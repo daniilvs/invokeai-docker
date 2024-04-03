@@ -4,30 +4,47 @@ FROM nvcr.io/nvidia/cuda:11.7.1-cudnn8-runtime-ubuntu22.04
 ARG PYTHON_VERSION
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
+    build-essential \ 
+    zlib1g-dev \ 
+    libncurses5-dev \ 
+    libgdbm-dev \ 
+    libnss3-dev \
+    libssl-dev \
+    libreadline-dev \
+    libffi-dev \
+    libsqlite3-dev \
+    libbz2-dev \
     wget \
     git-core \
     unzip \
     zsh \
-    poppler-utils \
-    python3-setuptools \
+    poppler-utils \ 
     libgl1-mesa-glx \
     libglib2.0-0 \
-    python${PYTHON_VERSION} \
-    python${PYTHON_VERSION}-dev \
-    python${PYTHON_VERSION}-distutils \
+    # python3-setuptools \
+   
+    # python${PYTHON_VERSION} \
+    # # python${PYTHON_VERSION}-dev \
+    # python${PYTHON_VERSION}-distutils \
     && apt-get autoremove -y \
     && apt-get clean \
     && rm -rf /var/tmp/* /var/lib/apt/lists/*
+
+RUN wget https://www.python.org/ftp/python/3.11.3/Python-3.11.3.tgz \
+    tar -xf Python-3.11.3.tgz \
+    ./configure --enable-optimizations \
+    make -j 12 \
+    sudo make install
 
 # Set the default python version
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python${PYTHON_VERSION} 1 \
     && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python${PYTHON_VERSION} 1
     
 # Install Nvidia Container Toolkit
-# RUN curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
-#   && curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
-#    sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
-#     sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+RUN curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
+  && curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
+   sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+    sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
 
 WORKDIR /tmp
 
